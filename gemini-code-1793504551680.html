@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NetPulse Pro - Real-Time Network & System Diagnostics</title>
+  
+  <!-- SVG Favicon Data URI -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 12h-4l-3 9L9 3l-3 9H2'/%3E%3C/svg%3E" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#2563eb',
+              600: '#1d4ed8',
+              700: '#1e40af',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .soft-shadow {
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 4px 12px -2px rgba(0, 0, 0, 0.02);
+    }
+    .pulse-glow {
+      animation: pulse-glow-anim 2s infinite;
+    }
+    @keyframes pulse-glow-anim {
+      0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.35); }
+      70% { box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ==================== WELCOME LANDING HOME PAGE ==================== -->
+  <div id="welcomeScreen" class="min-h-screen flex flex-col justify-between bg-gradient-to-b from-blue-50/60 via-white to-slate-50 relative overflow-hidden">
+    <!-- Decorative background elements -->
+    <div class="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 -mb-20 -ml-20 w-96 h-96 bg-purple-100 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+
+    <!-- Header Navigation -->
+    <header class="max-w-7xl mx-auto w-full px-6 py-6 flex items-center justify-between relative z-10">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+          <i data-lucide="activity" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight text-slate-900">NetPulse <span class="text-blue-600">Pro</span></span>
+          <span class="hidden sm:inline-block text-[10px] bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full ml-2">v2.5 Light</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3.5 py-1.5 rounded-full text-xs font-semibold border border-emerald-200">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>100% Real Browser & REST APIs</span>
+        </div>
+        <button onclick="launchDashboard()" class="hidden sm:flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-md transition cursor-pointer">
+          <span>Open Dashboard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <main class="max-w-6xl mx-auto px-6 py-10 text-center relative z-10 flex flex-col items-center">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-medium mb-6">
+        <i data-lucide="shield-check" class="w-4 h-4 text-blue-600"></i>
+        Zero Mock Data &bull; Certified Native Diagnostics
+      </div>
+      
+      <h1 class="text-4xl sm:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight max-w-4xl mb-6">
+        Real-Time Connection & <span class="gradient-text">Hardware Telemetry</span> Platform
+      </h1>
+      
+      <p class="text-base sm:text-lg text-slate-600 max-w-2xl mb-8 font-normal leading-relaxed">
+        Accurate public IP geolocation, live HTTPS bandwidth throughput benchmark, CDN edge latency sweeps, WebRTC local interface audits, battery health, storage quota, and Web Audio diagnostics.
+      </p>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row items-center gap-4 mb-12">
+        <button onclick="launchDashboard()" class="pulse-glow group relative inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold text-base shadow-xl shadow-blue-500/25 hover:bg-blue-700 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer">
+          <span>Launch Live Dashboard</span>
+          <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+        </button>
+        <button onclick="launchDashboardAndRunSpeedTest()" class="inline-flex items-center gap-2 px-6 py-4 rounded-xl bg-white text-slate-700 border border-slate-200 font-semibold text-base shadow-sm hover:bg-slate-50 transition cursor-pointer">
+          <i data-lucide="zap" class="w-5 h-5 text-amber-500"></i>
+          <span>Instant Speed Benchmark</span>
+        </button>
+      </div>
+
+      <!-- Quick Environment Telemetry Banner -->
+      <div class="w-full bg-white p-4 rounded-2xl border border-slate-200/80 soft-shadow mb-12 grid grid-cols-2 sm:grid-cols-4 gap-4 text-left text-xs font-mono">
+        <div>
+          <span class="text-slate-400 font-sans block text-[11px]">Network State</span>
+          <span id="quickHomeOnline" class="font-bold text-emerald-600 flex items-center gap-1 mt-0.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Online
+          </span>
+        </div>
+        <div>
+          <span class="text-slate-400 font-sans block text-[11px]">User Platform</span>
+          <span id="quickHomePlatform" class="font-bold text-slate-800 mt-0.5 block truncate">Detecting...</span>
+        </div>
+        <div>
+          <span class="text-slate-400 font-sans block text-[11px]">Display Resolution</span>
+          <span id="quickHomeScreen" class="font-bold text-slate-800 mt-0.5 block">--</span>
+        </div>
+        <div>
+          <span class="text-slate-400 font-sans block text-[11px]">CPU Cores</span>
+          <span id="quickHomeCores" class="font-bold text-blue-600 mt-0.5 block">-- Cores</span>
+        </div>
+      </div>
+
+      <!-- Feature Grid Highlights -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full text-left">
+        <!-- Feature 1 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 soft-shadow">
+          <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
+            <i data-lucide="globe" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 text-base mb-2">Public IP & Geolocation</h3>
+          <p class="text-slate-600 text-xs leading-relaxed">Live querying via secure HTTPS REST endpoints with automatic failover fallback support.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 soft-shadow">
+          <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4">
+            <i data-lucide="gauge" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 text-base mb-2">HTTPS Speed Test</h3>
+          <p class="text-slate-600 text-xs leading-relaxed">Calculates real download throughput using browser timing against CDN endpoints with Chart.js graphing.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 soft-shadow">
+          <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
+            <i data-lucide="shield-search" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 text-base mb-2">WebRTC & Network Interfaces</h3>
+          <p class="text-slate-600 text-xs leading-relaxed">Uses RTCPeerConnection to discover local subnets and STUN candidate paths for connection audits.</p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 soft-shadow">
+          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
+            <i data-lucide="battery-charging" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 text-base mb-2">Battery & Power API</h3>
+          <p class="text-slate-600 text-xs leading-relaxed">Direct queries to browser Battery Manager API for live battery percentage, state, and timers.</p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 soft-shadow">
+          <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mb-4">
+            <i data-lucide="database" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 text-base mb-2">Storage Quota API</h3>
+          <p class="text-slate-600 text-xs leading-relaxed">Measures browser storage usage and available local disk quota allocation in real time.</p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 soft-shadow">
+          <div class="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-4">
+            <i data-lucide="volume-2" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 text-base mb-2">Web Audio Synthesizer</h3>
+          <p class="text-slate-600 text-xs leading-relaxed">Tests browser audio output latency, sample rate frequency, and audio output channels.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto w-full px-6 py-6 text-center text-slate-400 text-xs border-t border-slate-200/60">
+      NetPulse Pro &bull; Browser-Native Diagnostic Telemetry Platform
+    </footer>
+  </div>
+
+  <!-- ==================== MAIN DASHBOARD SCREEN ==================== -->
+  <div id="dashboardScreen" class="hidden min-h-screen flex-col bg-slate-50">
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+            <i data-lucide="activity" class="w-5 h-5"></i>
+          </div>
+          <span class="text-lg font-bold text-slate-900">NetPulse <span class="text-blue-600">Pro</span></span>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <button onclick="refreshAllDiagnostics()" class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            <span>Rescan All</span>
+          </button>
+          <button onclick="showWelcomeScreen()" class="px-3.5 py-2 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer">
+            Home Screen
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Content Area -->
+    <main class="max-w-7xl mx-auto px-6 py-8 w-full flex-grow space-y-8">
+      
+      <!-- Top Overview Stats -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Public IP Card -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 soft-shadow flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold tracking-wider uppercase mb-2">
+            <span>Public IPv4 Address</span>
+            <i data-lucide="globe" class="w-4 h-4 text-blue-600"></i>
+          </div>
+          <div id="statIp" class="text-xl font-extrabold text-slate-900 tracking-tight my-1">Detecting...</div>
+          <div id="statIsp" class="text-xs text-slate-500 truncate">Fetching ISP details...</div>
+        </div>
+
+        <!-- Latency Card -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 soft-shadow flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold tracking-wider uppercase mb-2">
+            <span>Edge Ping Latency</span>
+            <i data-lucide="timer" class="w-4 h-4 text-emerald-600"></i>
+          </div>
+          <div id="statPing" class="text-xl font-extrabold text-slate-900 tracking-tight my-1">-- ms</div>
+          <div id="statJitter" class="text-xs text-slate-500">Jitter: -- ms</div>
+        </div>
+
+        <!-- Network State Card -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 soft-shadow flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold tracking-wider uppercase mb-2">
+            <span>Network Status</span>
+            <i data-lucide="wifi" class="w-4 h-4 text-purple-600"></i>
+          </div>
+          <div id="statOnline" class="text-xl font-extrabold text-emerald-600 tracking-tight my-1">Online</div>
+          <div id="statEffectiveType" class="text-xs text-slate-500">Speed Level: Detecting...</div>
+        </div>
+
+        <!-- Hardware Summary -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 soft-shadow flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold tracking-wider uppercase mb-2">
+            <span>Hardware Profile</span>
+            <i data-lucide="cpu" class="w-4 h-4 text-amber-600"></i>
+          </div>
+          <div id="statCores" class="text-xl font-extrabold text-slate-900 tracking-tight my-1">-- Cores</div>
+          <div id="statRam" class="text-xs text-slate-500">Memory Estimate: --</div>
+        </div>
+      </div>
+
+      <!-- Main Section Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Left 2 Columns: Bandwidth Benchmark, Geolocation, & Advanced APIs -->
+        <div class="lg:col-span-2 space-y-8">
+          
+          <!-- Speed Test Card -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 soft-shadow">
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <i data-lucide="gauge" class="w-5 h-5 text-blue-600"></i>
+                  Real Bandwidth Benchmark
+                </h2>
+                <p class="text-xs text-slate-500">Measures actual HTTP payload download throughput in real time.</p>
+              </div>
+              <button id="runSpeedTestBtn" onclick="runRealSpeedTest()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg shadow-md shadow-blue-500/20 transition-all cursor-pointer flex items-center gap-2">
+                <i data-lucide="play" class="w-4 h-4"></i>
+                Start Test
+              </button>
+            </div>
+
+            <!-- Gauge / Display -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+              <div class="bg-slate-50 p-4 rounded-xl text-center border border-slate-100">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Download Speed</span>
+                <div id="speedResult" class="text-3xl font-extrabold text-blue-600 my-1">0.00</div>
+                <span class="text-xs text-slate-400 font-medium">Mbps</span>
+              </div>
+              <div class="bg-slate-50 p-4 rounded-xl text-center border border-slate-100">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Data Transferred</span>
+                <div id="bytesResult" class="text-3xl font-extrabold text-slate-800 my-1">0 MB</div>
+                <span class="text-xs text-slate-400 font-medium">HTTPS Chunks</span>
+              </div>
+              <div class="bg-slate-50 p-4 rounded-xl text-center border border-slate-100">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Elapsed Time</span>
+                <div id="timeResult" class="text-3xl font-extrabold text-slate-800 my-1">0.0 s</div>
+                <span class="text-xs text-slate-400 font-medium">Duration</span>
+              </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="h-64 w-full">
+              <canvas id="speedChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Geolocation & Provider Details -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 soft-shadow">
+            <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <i data-lucide="map-pin" class="w-5 h-5 text-purple-600"></i>
+              Public Geolocation & Network Carrier
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+              <div class="flex justify-between py-2.5 border-b border-slate-100">
+                <span class="text-slate-500 font-sans">IP Address:</span>
+                <span id="detailIp" class="font-bold text-slate-900">--</span>
+              </div>
+              <div class="flex justify-between py-2.5 border-b border-slate-100">
+                <span class="text-slate-500 font-sans">Internet Provider:</span>
+                <span id="detailOrg" class="font-bold text-slate-900">--</span>
+              </div>
+              <div class="flex justify-between py-2.5 border-b border-slate-100">
+                <span class="text-slate-500 font-sans">Country:</span>
+                <span id="detailCountry" class="font-bold text-slate-900">--</span>
+              </div>
+              <div class="flex justify-between py-2.5 border-b border-slate-100">
+                <span class="text-slate-500 font-sans">City / Region:</span>
+                <span id="detailCity" class="font-bold text-slate-900">--</span>
+              </div>
+              <div class="flex justify-between py-2.5 border-b border-slate-100">
+                <span class="text-slate-500 font-sans">Timezone:</span>
+                <span id="detailTimezone" class="font-bold text-slate-900">--</span>
+              </div>
+              <div class="flex justify-between py-2.5 border-b border-slate-100">
+                <span class="text-slate-500 font-sans">Coordinates:</span>
+                <span id="detailLoc" class="font-bold text-slate-900">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- WebRTC Local Candidate & Network Interface Audit -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 soft-shadow">
+            <h2 class="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
+              <i data-lucide="shield-search" class="w-5 h-5 text-amber-600"></i>
+              WebRTC Network Interface & Candidate Detection
+            </h2>
+            <p class="text-xs text-slate-500 mb-4">Discovers local IP paths using RTCPeerConnection STUN queries.</p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <span class="text-slate-500 font-sans block text-[11px]">Discovered Local/STUN Candidate</span>
+                <span id="webrtcIp" class="font-bold text-amber-700 text-sm mt-1 block">Scanning WebRTC...</span>
+              </div>
+              <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <span class="text-slate-500 font-sans block text-[11px]">ICE Candidate Type</span>
+                <span id="webrtcCandidateType" class="font-bold text-slate-800 text-sm mt-1 block">--</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Battery, Storage, Audio & Console Logs -->
+        <div class="space-y-8">
+          
+          <!-- System Battery & Power API -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 soft-shadow">
+            <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <i data-lucide="battery-charging" class="w-5 h-5 text-emerald-600"></i>
+              Battery & Power Status API
+            </h2>
+            <div class="space-y-3 text-xs">
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500">Charge Level:</span>
+                <span id="battLevel" class="font-bold text-emerald-600">-- %</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500">Power Source:</span>
+                <span id="battState" class="font-semibold text-slate-900">--</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500">Time to Full Charge:</span>
+                <span id="battFullTime" class="font-semibold text-slate-900">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Storage Quota API -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 soft-shadow">
+            <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <i data-lucide="database" class="w-5 h-5 text-rose-600"></i>
+              Browser Storage & Quota API
+            </h2>
+            <div class="space-y-3 text-xs font-mono">
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500 font-sans">Storage Used:</span>
+                <span id="storageUsed" class="font-semibold text-slate-900">--</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500 font-sans">Quota Available:</span>
+                <span id="storageQuota" class="font-semibold text-slate-900">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Web Audio Latency Synthesizer -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 soft-shadow">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="volume-2" class="w-5 h-5 text-teal-600"></i>
+                Web Audio Engine
+              </h2>
+              <button onclick="testAudioLatency()" class="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 font-semibold text-xs rounded-lg transition border border-teal-200 cursor-pointer">
+                Synth Beep Test
+              </button>
+            </div>
+            <div class="space-y-3 text-xs font-mono">
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500 font-sans">Audio Context State:</span>
+                <span id="audioState" class="font-semibold text-slate-900">--</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500 font-sans">Base Output Latency:</span>
+                <span id="audioLatency" class="font-bold text-teal-700">--</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500 font-sans">Sample Frequency Rate:</span>
+                <span id="audioSampleRate" class="font-semibold text-slate-900">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hardware Telemetry Specs -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 soft-shadow">
+            <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <i data-lucide="laptop" class="w-5 h-5 text-amber-600"></i>
+              Hardware Telemetry
+            </h2>
+            <div class="space-y-3 text-xs">
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500">CPU Logical Cores:</span>
+                <span id="hwCores" class="font-semibold text-slate-900">--</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500">Device RAM:</span>
+                <span id="hwRam" class="font-semibold text-slate-900">--</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500">Screen Resolution:</span>
+                <span id="hwScreen" class="font-semibold text-slate-900">--</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500">Platform:</span>
+                <span id="hwPlatform" class="font-semibold text-slate-900">--</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500">User Agent:</span>
+                <span id="hwUa" class="font-semibold text-slate-900 truncate max-w-[160px]">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live API Response Log -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 soft-shadow">
+            <h2 class="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
+              <i data-lucide="terminal" class="w-5 h-5 text-slate-700"></i>
+              API Activity Console
+            </h2>
+            <p class="text-xs text-slate-500 mb-4">Real-time HTTP requests and Web API calls logged live.</p>
+            <div id="logBox" class="bg-slate-900 text-slate-200 font-mono text-[11px] p-4 rounded-xl h-56 overflow-y-auto space-y-1">
+              <div class="text-slate-500">[System] Initializing NetPulse Pro diagnostics...</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-12">
+      NetPulse Pro &bull; 100% Real Browser & Network Diagnostic Tool
+    </footer>
+  </div>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Chart initialization
+    let speedChart;
+    function initChart() {
+      const ctx = document.getElementById('speedChart').getContext('2d');
+      speedChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Download Bandwidth (Mbps)',
+            data: [],
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.08)',
+            fill: true,
+            tension: 0.4,
+            borderWidth: 2,
+            pointRadius: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: { grid: { display: false } },
+            y: { 
+              beginAtZero: true,
+              grid: { color: '#f1f5f9' },
+              title: { display: true, text: 'Mbps', color: '#94a3b8' }
+            }
+          }
+        }
+      });
+    }
+
+    function logMessage(msg) {
+      const logBox = document.getElementById('logBox');
+      if (!logBox) return;
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.innerHTML = `<span class="text-blue-400">[${time}]</span> ${msg}`;
+      logBox.appendChild(entry);
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function showWelcomeScreen() {
+      document.getElementById('welcomeScreen').classList.remove('hidden');
+      document.getElementById('welcomeScreen').classList.add('flex');
+      document.getElementById('dashboardScreen').classList.add('hidden');
+      document.getElementById('dashboardScreen').classList.remove('flex');
+    }
+
+    function launchDashboard() {
+      document.getElementById('welcomeScreen').classList.add('hidden');
+      document.getElementById('welcomeScreen').classList.remove('flex');
+      document.getElementById('dashboardScreen').classList.remove('hidden');
+      document.getElementById('dashboardScreen').classList.add('flex');
+      
+      if (!speedChart) {
+        initChart();
+      }
+      refreshAllDiagnostics();
+    }
+
+    function launchDashboardAndRunSpeedTest() {
+      launchDashboard();
+      setTimeout(() => {
+        runRealSpeedTest();
+      }, 500);
+    }
+
+    // Quick Home Telemetry Check on Load
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('quickHomeOnline').innerHTML = navigator.onLine ? 
+        '<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Online' : 
+        '<span class="w-2 h-2 rounded-full bg-rose-500"></span> Offline';
+      
+      document.getElementById('quickHomePlatform').textContent = navigator.platform || 'Desktop';
+      document.getElementById('quickHomeScreen').textContent = `${window.screen.width} x ${window.screen.height}`;
+      document.getElementById('quickHomeCores').textContent = `${navigator.hardwareConcurrency || 'N/A'} Cores`;
+    });
+
+    // Fetch IP and Location from Real Public API
+    async function fetchNetworkDetails() {
+      logMessage("Fetching public IP and location details from API...");
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        if (!res.ok) throw new Error('Primary API failed');
+        const data = await res.json();
+        
+        document.getElementById('statIp').textContent = data.ip || 'Unavailable';
+        document.getElementById('statIsp').textContent = data.org || data.asn || 'Unknown ISP';
+        document.getElementById('detailIp').textContent = data.ip || '--';
+        document.getElementById('detailOrg').textContent = data.org || '--';
+        document.getElementById('detailCountry').textContent = `${data.country_name} (${data.country_code})` || '--';
+        document.getElementById('detailCity').textContent = `${data.city}, ${data.region}` || '--';
+        document.getElementById('detailTimezone').textContent = data.timezone || '--';
+        document.getElementById('detailLoc').textContent = `${data.latitude}, ${data.longitude}` || '--';
+
+        logMessage(`IP detected: ${data.ip} (${data.org || 'ISP found'})`);
+      } catch (err) {
+        logMessage("Primary API failed. Trying fallback endpoint...");
+        try {
+          const fallbackRes = await fetch('https://api.ipify.org?format=json');
+          const fallbackData = await fallbackRes.json();
+          document.getElementById('statIp').textContent = fallbackData.ip;
+          document.getElementById('detailIp').textContent = fallbackData.ip;
+          logMessage(`Fallback IP detected: ${fallbackData.ip}`);
+        } catch (error) {
+          logMessage("Unable to reach public IP endpoints.");
+        }
+      }
+    }
+
+    // Real WebRTC Candidate Detector
+    function scanWebRTCInterfaces() {
+      logMessage("Scanning local interfaces via WebRTC STUN peer context...");
+      try {
+        const pc = new RTCPeerConnection({
+          iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        });
+        pc.createDataChannel('');
+        pc.createOffer().then(offer => pc.setLocalDescription(offer));
+        
+        pc.onicecandidate = (event) => {
+          if (!event || !event.candidate) return;
+          const candidateStr = event.candidate.candidate;
+          const parts = candidateStr.split(' ');
+          const ip = parts[4];
+          const type = parts[7] || 'host';
+
+          if (ip) {
+            document.getElementById('webrtcIp').textContent = ip;
+            document.getElementById('webrtcCandidateType').textContent = type.toUpperCase();
+            logMessage(`WebRTC Candidate Path: ${ip} (${type})`);
+          }
+        };
+      } catch (err) {
+        document.getElementById('webrtcIp').textContent = "Blocked / Unsupported";
+        logMessage("WebRTC interface discovery restricted by browser security policies.");
+      }
+    }
+
+    // Measure Real Latency & Jitter
+    async function measureRealPing() {
+      logMessage("Measuring live edge latency to Cloudflare CDN...");
+      const pings = [];
+      const testUrl = 'https://1.1.1.1/cdn-cgi/trace';
+
+      for (let i = 0; i < 4; i++) {
+        const start = performance.now();
+        try {
+          await fetch(testUrl + '?cachebreak=' + Math.random(), { mode: 'no-cors', cache: 'no-store' });
+          const duration = Math.round(performance.now() - start);
+          pings.push(duration);
+        } catch (e) {
+          pings.push(0);
+        }
+      }
+
+      const validPings = pings.filter(p => p > 0);
+      if (validPings.length > 0) {
+        const avgPing = Math.round(validPings.reduce((a, b) => a + b, 0) / validPings.length);
+        const jitter = Math.max(...validPings) - Math.min(...validPings);
+        document.getElementById('statPing').textContent = `${avgPing} ms`;
+        document.getElementById('statJitter').textContent = `Jitter: ${jitter} ms`;
+        logMessage(`Average Latency: ${avgPing} ms | Jitter: ${jitter} ms`);
+      } else {
+        document.getElementById('statPing').textContent = 'N/A';
+      }
+    }
+
+    // Battery API Telemetry
+    async function getBatteryDetails() {
+      if ('getBattery' in navigator) {
+        try {
+          const battery = await navigator.getBattery();
+          const updateBattery = () => {
+            document.getElementById('battLevel').textContent = `${Math.round(battery.level * 100)}%`;
+            document.getElementById('battState').textContent = battery.charging ? 'Plugged In (AC)' : 'On Battery';
+            document.getElementById('battFullTime').textContent = battery.chargingTime === Infinity ? 'N/A' : `${Math.round(battery.chargingTime / 60)} min`;
+          };
+          updateBattery();
+          battery.addEventListener('chargingchange', updateBattery);
+          battery.addEventListener('levelchange', updateBattery);
+          logMessage(`Battery level: ${Math.round(battery.level * 100)}%`);
+        } catch (e) {
+          document.getElementById('battLevel').textContent = 'Not Available';
+        }
+      } else {
+        document.getElementById('battLevel').textContent = 'API Unsupported';
+      }
+    }
+
+    // Storage Quota API Telemetry
+    async function getStorageQuotaDetails() {
+      if (navigator.storage && navigator.storage.estimate) {
+        try {
+          const estimate = await navigator.storage.estimate();
+          const usedMB = (estimate.usage / (1024 * 1024)).toFixed(1);
+          const quotaGB = (estimate.quota / (1024 * 1024 * 1024)).toFixed(1);
+          
+          document.getElementById('storageUsed').textContent = `${usedMB} MB`;
+          document.getElementById('storageQuota').textContent = `${quotaGB} GB`;
+          logMessage(`Browser Storage: ${usedMB} MB used of ${quotaGB} GB quota`);
+        } catch (e) {
+          document.getElementById('storageUsed').textContent = 'Error';
+        }
+      } else {
+        document.getElementById('storageUsed').textContent = 'Unsupported';
+      }
+    }
+
+    // Web Audio Synthesizer Latency Diagnostic
+    let audioCtx;
+    function getAudioDetails() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) {
+          document.getElementById('audioState').textContent = 'Unsupported';
+          return;
+        }
+        audioCtx = audioCtx || new AudioContext();
+        document.getElementById('audioState').textContent = audioCtx.state.toUpperCase();
+        document.getElementById('audioLatency').textContent = audioCtx.baseLatency ? `${(audioCtx.baseLatency * 1000).toFixed(1)} ms` : 'Standard';
+        document.getElementById('audioSampleRate').textContent = `${audioCtx.sampleRate} Hz`;
+        logMessage(`Web Audio Context active: ${audioCtx.sampleRate} Hz`);
+      } catch (e) {
+        document.getElementById('audioState').textContent = 'Error';
+      }
+    }
+
+    function testAudioLatency() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = audioCtx || new AudioContext();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+        logMessage("Audio Synthesizer: 880Hz test tone emitted.");
+      } catch (e) {
+        logMessage("Audio playback error.");
+      }
+    }
+
+    // Hardware Telemetry
+    function getHardwareDetails() {
+      const cores = navigator.hardwareConcurrency || 'N/A';
+      const ram = navigator.deviceMemory ? `~${navigator.deviceMemory} GB` : 'N/A';
+      const screenRes = `${window.screen.width} x ${window.screen.height}`;
+      const platform = navigator.platform || 'Unknown';
+
+      document.getElementById('statCores').textContent = `${cores} Cores`;
+      document.getElementById('statRam').textContent = `RAM: ${ram}`;
+      document.getElementById('hwCores').textContent = cores;
+      document.getElementById('hwRam').textContent = ram;
+      document.getElementById('hwScreen').textContent = screenRes;
+      document.getElementById('hwPlatform').textContent = platform;
+      document.getElementById('hwUa').textContent = navigator.userAgent;
+
+      if (navigator.connection) {
+        document.getElementById('statEffectiveType').textContent = `Speed Level: ${navigator.connection.effectiveType ? navigator.connection.effectiveType.toUpperCase() : 'Standard'}`;
+      } else {
+        document.getElementById('statEffectiveType').textContent = 'Standard Connection';
+      }
+    }
+
+    // Real Speed Test Functionality
+    async function runRealSpeedTest() {
+      const btn = document.getElementById('runSpeedTestBtn');
+      btn.disabled = true;
+      btn.classList.add('opacity-50');
+      btn.innerText = 'Testing...';
+
+      logMessage("Initiating HTTPS download speed benchmark...");
+
+      const testImage = "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=3000&q=80";
+      const chartData = [];
+      const chartLabels = [];
+      
+      const startTime = performance.now();
+      let totalBytes = 0;
+
+      try {
+        for (let i = 1; i <= 5; i++) {
+          const stepStart = performance.now();
+          const response = await fetch(`${testImage}&cacheBust=${Math.random()}`, { cache: "no-store" });
+          const blob = await response.blob();
+          const stepEnd = performance.now();
+
+          const durationSec = (stepEnd - stepStart) / 1000;
+          const bytes = blob.size;
+          totalBytes += bytes;
+
+          const speedMbps = ((bytes * 8) / (durationSec * 1000000)).toFixed(2);
+
+          chartLabels.push(`Sample ${i}`);
+          chartData.push(speedMbps);
+
+          document.getElementById('speedResult').textContent = speedMbps;
+          document.getElementById('bytesResult').textContent = `${(totalBytes / (1024 * 1024)).toFixed(2)} MB`;
+          document.getElementById('timeResult').textContent = `${((performance.now() - startTime) / 1000).toFixed(1)} s`;
+
+          speedChart.data.labels = chartLabels;
+          speedChart.data.datasets[0].data = chartData;
+          speedChart.update();
+
+          logMessage(`Payload Chunk ${i}: ${speedMbps} Mbps`);
+        }
+
+        const finalDuration = (performance.now() - startTime) / 1000;
+        const avgMbps = ((totalBytes * 8) / (finalDuration * 1000000)).toFixed(2);
+        document.getElementById('speedResult').textContent = avgMbps;
+        logMessage(`Speed Test Completed. Final Throughput Average: ${avgMbps} Mbps`);
+
+      } catch (err) {
+        logMessage("Speed test encountered an error during download.");
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50');
+        btn.innerHTML = `<i data-lucide="play" class="w-4 h-4"></i> Start Test`;
+        lucide.createIcons();
+      }
+    }
+
+    function refreshAllDiagnostics() {
+      fetchNetworkDetails();
+      measureRealPing();
+      scanWebRTCInterfaces();
+      getBatteryDetails();
+      getStorageQuotaDetails();
+      getAudioDetails();
+      getHardwareDetails();
+    }
+  </script>
+</body>
+</html>
